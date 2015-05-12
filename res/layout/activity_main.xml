@@ -1,12 +1,22 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:background="#FFFFCC"
+    android:background="@drawable/bckgr"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context="com.emresevinc.imdb_film_onerici.MainActivity"
      >
 
+    <Spinner 
+        android:id="@+id/spinnerGenre"
+        android:layout_height="wrap_content"
+        android:layout_width="120dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="5dp"
+        android:spinnerMode="dialog"
+        android:background="@drawable/spinner"
+        
+        />
 	<Button 
 	    android:id="@+id/random_button"
 	    android:background="@layout/circlebutton1"

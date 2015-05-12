@@ -15,15 +15,16 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-
-import android.support.v7.app.ActionBarActivity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 
@@ -31,22 +32,29 @@ public class MainActivity extends ActionBarActivity {
 
 	ArrayList<StringBuilder> strs = null;
 	String[] files={"imdb2.json","imdb3.json","imdb4.json","imdb5.json",
-			"imdb6.json","imdb7.json","imdb8.json","imdb9.json"};
+			"imdb6.json","imdb7.json","imdb8.json","imdb9.json",
+			"imdb10.json","imdb11.json","imdb12.json","imdb13.json",
+			"imdb14.json","imdb15.json"};
 	ArrayList<JSONObject> JSONObjects= null;
 	ArrayList<Movies> movies =null;
 	ImageView imageView = null;
 	TextView titTv, yearTv, ratedTv, relaesedTv, runtimeTv,genreTv,directorTv,writerTv,
 		actorsTv, plotTv, languageTv,countryTv,awardsTv,metascoreTv,IMDBRatingTv,IMDBVotesTv;
-    @Override
+    Spinner spinnerGenre = null;
+    
+	@Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         strs = new ArrayList<StringBuilder>();
         JSONObjects = new ArrayList<JSONObject>();
-        func(files);
+        addJSONs(files);
         createJSONObjects(strs);
         movies = getJSONObjects();
+        
+        spinnerGenre = (Spinner) findViewById(R.id.spinnerGenre);
+        addSpinnerItems();
         
         imageView = (ImageView)findViewById(R.id.imgView);
         titTv = (TextView) findViewById(R.id.titleTv);
@@ -65,10 +73,11 @@ public class MainActivity extends ActionBarActivity {
         metascoreTv = (TextView) findViewById(R.id.metascoreTv);
         IMDBRatingTv = (TextView) findViewById(R.id.imdbRatingTv);
         IMDBVotesTv = (TextView) findViewById(R.id.imdbVotesTv);
+        selectMovieGenre(); // uygulama baþlatýldýðý anda bir film tavsiyesi alýnýyor.
     }
 
     
-    public void func(String[] dosyalar)
+    public void addJSONs(String[] dosyalar)
     {    	
     	StringBuilder buf = null;
     	InputStream is = null;
@@ -153,49 +162,71 @@ public class MainActivity extends ActionBarActivity {
     	return movs;
     }
     
-    static final Random random = new Random();
+    
     public void showMovie(View v)
     {
-    	
-    	int i = random.nextInt(movies.size());
-    	new Background().execute(movies.get(i).getPoster());
-    	titTv.setText(movies.get(i).getTitle());
-    	yearTv.setText(movies.get(i).getYear());
-    	ratedTv.setText(movies.get(i).getRated());
-    	relaesedTv.setText(movies.get(i).getReleased());
-    	runtimeTv.setText(movies.get(i).getRuntime());
-    	genreTv.setText(movies.get(i).getGenre());
-    	directorTv.setText(movies.get(i).getDirector());
-    	writerTv.setText(movies.get(i).getWriter());
-    	actorsTv.setText(movies.get(i).getActors());
-    	plotTv.setText(movies.get(i).getPlot());
-    	languageTv.setText(movies.get(i).getLanguage());
-    	countryTv.setText(movies.get(i).getCountry());
-    	awardsTv.setText(movies.get(i).getAwards());
-    	metascoreTv.setText(movies.get(i).getMetascore());
-    	IMDBRatingTv.setText(movies.get(i).getImdbRating());
-    	IMDBVotesTv.setText(movies.get(i).getImdbVotes());
+    	selectMovieGenre();
     }
     
-    public Bitmap LoadImageFromWebOperations(String url) {
-
-		try {
-			URL newurl = new URL(url);
-			HttpURLConnection connection = (HttpURLConnection) newurl.openConnection();
-			connection.setDoInput(true);
-			connection.connect();
-			InputStream input = connection.getInputStream();
-			Bitmap bitmap = BitmapFactory.decodeStream(input);
-			return bitmap;
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-			return null;
-		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
-		} 
-    	
+    public void selectMovieGenre()
+    {
+    	if(spinnerGenre.getSelectedItemPosition() == 0){
+	    	pushMovie(movies);
+    	}else
+    	{
+    		String genre = spinnerGenre.getSelectedItem().toString();
+    		pushMovie(getMoviesWithGenre(genre));
+    	}
     }
+    
+    ArrayList<Movies> genreMovies = null; 
+    public ArrayList<Movies> getMoviesWithGenre(String genre)
+    {
+    	if(genreMovies == null)
+    		genreMovies = new ArrayList<Movies>();
+    	genreMovies.clear();
+    	for(Movies mvs : movies)
+    	{
+    		if(mvs.getGenre().contains(genre))
+    		{
+    			genreMovies.add(mvs);
+    		}
+    	}
+    	return genreMovies;
+    }
+    static final Random random = new Random();
+    public void pushMovie(ArrayList<Movies> mov)
+    {
+    	int i = random.nextInt(mov.size());
+    	new Background().execute(mov.get(i).getPoster()); // Arka planda kapak fotografý getirilmesi için
+    	titTv.setText(mov.get(i).getTitle());
+    	yearTv.setText(mov.get(i).getYear());
+    	ratedTv.setText(mov.get(i).getRated());
+    	relaesedTv.setText(mov.get(i).getReleased());
+    	runtimeTv.setText(mov.get(i).getRuntime());
+    	genreTv.setText(mov.get(i).getGenre());
+    	directorTv.setText(mov.get(i).getDirector());
+    	writerTv.setText(mov.get(i).getWriter());
+    	actorsTv.setText(mov.get(i).getActors());
+    	plotTv.setText(mov.get(i).getPlot());
+    	languageTv.setText(mov.get(i).getLanguage());
+    	countryTv.setText(mov.get(i).getCountry());
+    	awardsTv.setText(mov.get(i).getAwards());
+    	metascoreTv.setText(mov.get(i).getMetascore());
+    	IMDBRatingTv.setText(mov.get(i).getImdbRating());
+    	IMDBVotesTv.setText(mov.get(i).getImdbVotes());
+    }
+    
+    
+  public void addSpinnerItems()
+  {
+	  String[] items ={"None","Horror", "Mystery", "Thriller","Crime", "Drama","Comedy", "Romance","Action","War","Adventure",
+			  			"Western","Fantasy","Family","Sci-Fi","Biography","History"};
+	  ArrayAdapter adapter = new ArrayAdapter(this,android.R.layout.simple_spinner_item,items);
+	  adapter.setDropDownViewResource(R.layout.spinnerlayout1);
+	  spinnerGenre.setAdapter(adapter);
+	  
+  }
     
   private class Background extends AsyncTask<String,Void,Bitmap> {
 
